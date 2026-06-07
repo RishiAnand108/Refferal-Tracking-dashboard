@@ -7,6 +7,83 @@ from .models import Respondent, Survey, ReferralStatus
 from .utils import get_referrer_from_session
 # panel/views.py — add this
 from django.contrib.admin.views.decorators import staff_member_required
+# panel/views.py — add this
+from django.core.paginator import Paginator
+from django.db.models import Q, Count
+from django.contrib.admin.views.decorators import staff_member_required
+
+@staff_member_required
+def dashboard(request):
+    q              = request.GET.get('q', '')
+    city_filter    = request.GET.get('city', '')
+    category_filter = request.GET.get('category', '')
+
+    respondents = Respondent.objects.all()
+
+    # search
+    if q:
+        respondents = respondents.filter(
+            Q(name__icontains=q)      |
+            Q(email__icontains=q)     |
+            Q(unique_id__icontains=q) |
+            Q(city__icontains=q)      |
+            Q(phone__icontains=q)
+        )
+
+    # filters
+    if city_filter:
+        respondents = respondents.filter(city=city_filter)
+    if category_filter:
+        respondents = respondents.filter(category=category_filter)
+
+    # pagination
+    paginator = Paginator(respondents, 25)
+    page      = request.GET.get('page', 1)
+    page_obj  = paginator.get_page(page)
+
+    # metrics
+    total      = Respondent.objects.count()
+    active     = Respondent.objects.filter(status='active').count()
+    cooloff    = Respondent.objects.filter(status='cooloff').count()
+    inactive   = Respondent.objects.filter(status='inactive').count()
+    leads      = ReferralStatus.objects.filter(stage='lead').count()
+    fits       = ReferralStatus.objects.filter(stage='fit').count()
+    completions = ReferralStatus.objects.filter(stage='completion').count()
+
+    # city breakdown
+    city_counts = Respondent.objects.values('city').annotate(
+        count=Count('id')
+    ).order_by('-count')[:5]
+
+    # referrals
+    referrals = ReferralStatus.objects.select_related(
+        'referrer', 'referred', 'survey'
+    ).order_by('-created_at')[:20]
+
+    cities     = Respondent.objects.values_list(
+        'city', flat=True
+    ).distinct()
+    categories = Respondent.objects.values_list(
+        'category', flat=True
+    ).distinct()
+
+    return render(request, 'panel/dashboard.html', {
+        'page_obj':        page_obj,
+        'q':               q,
+        'city_filter':     city_filter,
+        'category_filter': category_filter,
+        'cities':          cities,
+        'categories':      categories,
+        'total':           total,
+        'active':          active,
+        'cooloff':         cooloff,
+        'inactive':        inactive,
+        'leads':           leads,
+        'fits':            fits,
+        'completions':     completions,
+        'city_counts':     city_counts,
+        'referrals':       referrals,
+    })
 
 @staff_member_required
 def update_stage(request, pk):

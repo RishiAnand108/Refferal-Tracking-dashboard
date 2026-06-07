@@ -1,0 +1,374 @@
+<!-- templates/panel/dashboard.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard — Concave Insights</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .metric-card{border:none;border-radius:12px}
+    .table th{font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+    .badge-lead{background:#FFF3CD;color:#856404}
+    .badge-fit{background:#CFE2FF;color:#084298}
+    .badge-completion{background:#D1E7DD;color:#0A3622}
+  </style>
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-dark px-4">
+  <span class="navbar-brand fw-bold">📊 Concave Insights — Panel Dashboard</span>
+  <div>
+    <a href="{% url 'signup' %}" class="btn btn-outline-light btn-sm me-2">
+      + Add via Signup
+    </a>
+    <a href="{% url 'add-respondent' %}" class="btn btn-success btn-sm">
+      + Quick Add
+    </a>
+  </div>
+</nav>
+
+<div class="container-fluid mt-4 px-4">
+
+  <!-- Metrics -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-2">
+      <div class="card metric-card bg-white shadow-sm text-center p-3">
+        <div class="h2 fw-bold mb-0">{{ total }}</div>
+        <div class="text-muted small">Total Panel</div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="card metric-card shadow-sm text-center p-3" style="background:#D1E7DD">
+        <div class="h2 fw-bold mb-0 text-success">{{ active }}</div>
+        <div class="text-muted small">Active</div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="card metric-card shadow-sm text-center p-3" style="background:#FFF3CD">
+        <div class="h2 fw-bold mb-0 text-warning">{{ cooloff }}</div>
+        <div class="text-muted small">Cool-off</div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="card metric-card shadow-sm text-center p-3" style="background:#CFE2FF">
+        <div class="h2 fw-bold mb-0 text-primary">{{ leads }}</div>
+        <div class="text-muted small">Leads</div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="card metric-card shadow-sm text-center p-3" style="background:#E2D9F3">
+        <div class="h2 fw-bold mb-0" style="color:#6f42c1">{{ fits }}</div>
+        <div class="text-muted small">Fits</div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="card metric-card shadow-sm text-center p-3" style="background:#D1E7DD">
+        <div class="h2 fw-bold mb-0 text-success">{{ completions }}</div>
+        <div class="text-muted small">Completions</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search + Filters -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-5">
+          <label class="form-label small fw-semibold">Search</label>
+          <input type="text" name="q" value="{{ q }}"
+                 id="search-input"
+                 class="form-control"
+                 placeholder="Name, email, ID, city, phone...">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small fw-semibold">City</label>
+          <select name="city" class="form-select">
+            <option value="">All Cities</option>
+            {% for city in cities %}
+              <option value="{{ city }}"
+                {% if city == city_filter %}selected{% endif %}>
+                {{ city }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small fw-semibold">Category</label>
+          <select name="category" class="form-select">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+              <option value="{{ cat }}"
+                {% if cat == category_filter %}selected{% endif %}>
+                {{ cat }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-dark w-100">Filter</button>
+        </div>
+        <div class="col-md-1">
+          <a href="{% url 'dashboard' %}"
+             class="btn btn-outline-secondary w-100">Clear</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Export + count -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <span class="text-muted small">
+      Showing {{ page_obj.start_index }}–{{ page_obj.end_index }}
+      of {{ page_obj.paginator.count }} respondents
+    </span>
+    <div class="d-flex gap-2">
+      <a href="{% url 'export' %}?q={{ q }}&city={{ city_filter }}&category={{ category_filter }}&format=csv"
+         class="btn btn-outline-success btn-sm">
+        ⬇ Export CSV
+      </a>
+      <a href="{% url 'export' %}?q={{ q }}&city={{ city_filter }}&category={{ category_filter }}&format=excel"
+         class="btn btn-outline-primary btn-sm">
+        ⬇ Export Excel
+      </a>
+    </div>
+  </div>
+
+  <!-- Data grid -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0" id="respondent-table">
+          <thead class="table-dark">
+            <tr>
+              <th>Unique ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>City</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Referred By</th>
+              <th>Cool-off Until</th>
+              <th>Referral Link</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in page_obj %}
+            <tr>
+              <td><code>{{ r.unique_id }}</code></td>
+              <td>{{ r.name }}</td>
+              <td>{{ r.email }}</td>
+              <td>{{ r.phone }}</td>
+              <td>{{ r.city }}</td>
+              <td>
+                <span class="badge bg-secondary">{{ r.category }}</span>
+              </td>
+              <td>
+                {% if r.status == 'active' %}
+                  <span class="badge bg-success">Active</span>
+                {% elif r.status == 'cooloff' %}
+                  <span class="badge bg-warning text-dark">Cool-off</span>
+                {% else %}
+                  <span class="badge bg-secondary">Inactive</span>
+                {% endif %}
+              </td>
+              <td>{{ r.referred_by.name|default:"—" }}</td>
+              <td>{{ r.cool_off_until|default:"—" }}</td>
+              <td>
+                <button class="btn btn-outline-secondary btn-sm"
+                        onclick="copyLink('{{ request.scheme }}://{{ request.get_host }}/refer/{{ r.referral_code }}/')">
+                  📋 Copy
+                </button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="10" class="text-center text-muted py-4">
+                No respondents found.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+  <nav>
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ q }}&city={{ city_filter }}&category={{ category_filter }}">
+            ← Prev
+          </a>
+        </li>
+      {% endif %}
+      <li class="page-item active">
+        <span class="page-link">
+          Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+      </li>
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ q }}&city={{ city_filter }}&category={{ category_filter }}">
+            Next →
+          </a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+
+  <!-- Referral Status Table -->
+  <div class="card shadow-sm mt-4 mb-5">
+    <div class="card-header bg-white fw-semibold">
+      🔗 Recent Referral Activity
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Referrer</th>
+            <th>Referred</th>
+            <th>Stage</th>
+            <th>Bonus</th>
+            <th>Paid</th>
+            <th>Update Stage</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ref in referrals %}
+          <tr>
+            <td>{{ ref.referrer.name }}</td>
+            <td>{{ ref.referred.name }}</td>
+            <td>
+              {% if ref.stage == 'lead' %}
+                <span class="badge badge-lead px-2 py-1">Lead</span>
+              {% elif ref.stage == 'fit' %}
+                <span class="badge badge-fit px-2 py-1">Fit</span>
+              {% else %}
+                <span class="badge badge-completion px-2 py-1">Completion</span>
+              {% endif %}
+            </td>
+            <td>₹{{ ref.bonus_amount }}</td>
+            <td>
+              {% if ref.is_paid %}
+                <span class="text-success">✓ Paid</span>
+              {% else %}
+                <span class="text-muted">Pending</span>
+              {% endif %}
+            </td>
+            <td>
+              <form method="post"
+                    action="{% url 'update-stage' ref.pk %}">
+                {% csrf_token %}
+                <select name="stage" class="form-select form-select-sm"
+                        style="width:130px;display:inline-block"
+                        onchange="this.form.submit()">
+                  <option value="lead"
+                    {% if ref.stage == 'lead' %}selected{% endif %}>
+                    Lead
+                  </option>
+                  <option value="fit"
+                    {% if ref.stage == 'fit' %}selected{% endif %}>
+                    Fit
+                  </option>
+                  <option value="completion"
+                    {% if ref.stage == 'completion' %}selected{% endif %}>
+                    Completion
+                  </option>
+                </select>
+              </form>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center text-muted py-3">
+              No referral activity yet.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- AI Categorization Modal -->
+<div class="modal fade" id="aiModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">🤖 AI Category Suggestion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label">Type notes about the participant:</label>
+        <textarea id="ai-notes" class="form-control" rows="3"
+                  placeholder="e.g. works at Apollo hospital, manages ICU ward..."></textarea>
+        <button class="btn btn-primary mt-3 w-100" onclick="getAISuggestion()">
+          Get Suggestion
+        </button>
+        <div id="ai-result" class="mt-3" style="display:none">
+          <div class="alert alert-info">
+            <strong>Category:</strong> <span id="ai-category"></span><br>
+            <strong>Confidence:</strong> <span id="ai-confidence"></span><br>
+            <strong>Reason:</strong> <span id="ai-reason"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Floating AI button -->
+<button class="btn btn-primary"
+        style="position:fixed;bottom:30px;right:30px;border-radius:50%;width:56px;height:56px;font-size:20px"
+        data-bs-toggle="modal" data-bs-target="#aiModal">
+  🤖
+</button>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Real-time client-side search
+document.getElementById('search-input').addEventListener('input', function() {
+  const q     = this.value.toLowerCase();
+  const rows  = document.querySelectorAll('#respondent-table tbody tr');
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(q) ? '' : 'none';
+  });
+});
+
+// Copy referral link
+function copyLink(url) {
+  navigator.clipboard.writeText(url);
+  alert('Referral link copied: ' + url);
+}
+
+// AI categorization
+function getAISuggestion() {
+  const notes = document.getElementById('ai-notes').value;
+  if (!notes.trim()) return;
+
+  fetch('/ai-categorize/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: 'notes=' + encodeURIComponent(notes)
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('ai-category').textContent   = data.category;
+    document.getElementById('ai-confidence').textContent = data.confidence;
+    document.getElementById('ai-reason').textContent     = data.reason;
+    document.getElementById('ai-result').style.display   = 'block';
+  });
+}
+</script>
+</body>
+</html>
