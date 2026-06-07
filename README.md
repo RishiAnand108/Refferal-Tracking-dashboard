@@ -168,17 +168,17 @@ Add a license file to the repository (e.g., MIT) or update this section.
 ---
 ## 📷 Screenshots
 
-![dashboard](assets/screenshots/Screenshot 2026-06-07 105404.png)
+![dashboard](assets/screenshots/dashboard.png)
 
-![login](assets/screenshots/Screenshot 2026-06-07 105344.png)
+![login](assets/screenshots/login.png)
 
-![signup](assets/screenshots/Screenshot 2026-06-07 105443.png)
+![signup](assets/screenshots/signup.png)
 
-![login-welcome](assets/screenshots/Screenshot 2026-06-07 105526.png)
+![login-welcome](assets/screenshots/login-welcome.png)
 
-![recent-referral-activity](assets/screenshots/Screenshot 2026-06-07 105655.png)
+![recent-referral-activity](assets/screenshots/recent-referral-activity.png)
 
-![ai-suggestion](assets/screenshots/Screenshot 2026-06-07 105729.png)
+![ai-suggestion](assets/screenshots/ai-suggestion.png)
 ## 🔁 Workflow — How the project works (step-by-step)
 
 This section explains the user and admin flows from first visit to logout.
