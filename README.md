@@ -168,24 +168,17 @@ Add a license file to the repository (e.g., MIT) or update this section.
 ---
 ## 📷 Screenshots
 
-Place the project screenshots under `assets/screenshots/` (create the
-directory if it doesn't exist). Add image files using these filenames so
-the README can reference them directly on GitHub.
+![dashboard](assets/screenshots/Screenshot 2026-06-07 105404.png)
 
-- `assets/screenshots/login.png` — staff login screen
-- `assets/screenshots/dashboard.png` — main admin dashboard with stats and table
-- `assets/screenshots/signup.png` — public signup page showing referral banner
-- `assets/screenshots/login-welcome.png` — login showing welcome & ID message
-- `assets/screenshots/recent-referral-activity.png` — recent referral activity table
-- `assets/screenshots/ai-suggestion.png` — AI category suggestion modal
+![login](assets/screenshots/Screenshot 2026-06-07 105344.png)
 
-After adding images, commit them with:
+![signup](assets/screenshots/Screenshot 2026-06-07 105443.png)
 
-```powershell
-git add assets/screenshots/*
-git commit -m "docs: add project screenshots"
-git push origin main
-```
+![login-welcome](assets/screenshots/Screenshot 2026-06-07 105526.png)
+
+![recent-referral-activity](assets/screenshots/Screenshot 2026-06-07 105655.png)
+
+![ai-suggestion](assets/screenshots/Screenshot 2026-06-07 105729.png)
 ## 🔁 Workflow — How the project works (step-by-step)
 
 This section explains the user and admin flows from first visit to logout.
