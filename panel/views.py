@@ -11,6 +11,20 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from django.contrib.admin.views.decorators import staff_member_required
+# panel/views.py — add this
+from .forms import AddRespondentForm
+
+@staff_member_required
+def add_respondent(request):
+    if request.method == 'POST':
+        form = AddRespondentForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Respondent added successfully.')
+            return redirect('dashboard')
+    else:
+        form = AddRespondentForm()
+    return render(request, 'panel/add_respondent.html', {'form': form})
 
 @staff_member_required
 def dashboard(request):

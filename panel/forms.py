@@ -3,7 +3,32 @@ from django import forms
 from django.utils import timezone
 from .models import Respondent
 
+# panel/forms.py — add this class
+class AddRespondentForm(forms.ModelForm):
+    class Meta:
+        model  = Respondent
+        fields = ['name', 'email', 'phone', 'city', 'category', 'status']
+        widgets = {
+            'name':     forms.TextInput(attrs={'class': 'form-control'}),
+            'email':    forms.EmailInput(attrs={'class': 'form-control'}),
+            'phone':    forms.TextInput(attrs={'class': 'form-control'}),
+            'city':     forms.Select(attrs={'class': 'form-select'}),
+            'category': forms.Select(attrs={'class': 'form-select'}),
+            'status':   forms.Select(attrs={'class': 'form-select'}),
+        }
 
+    def clean_phone(self):
+        phone  = self.cleaned_data.get('phone')
+        digits = ''.join(filter(str.isdigit, phone))
+        if len(digits) != 10:
+            raise forms.ValidationError('Must be 10 digits.')
+        return digits
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if Respondent.objects.filter(email=email).exists():
+            raise forms.ValidationError('Email already exists.')
+        return email
 class SignupForm(forms.ModelForm):
     class Meta:
         model  = Respondent
