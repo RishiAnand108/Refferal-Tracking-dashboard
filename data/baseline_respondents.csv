@@ -1,0 +1,26 @@
+name,email,phone,city,category,status
+Priya Sharma,priya.sharma@gmail.com,9876543210,Mumbai,Healthcare,active
+Rahul Mehta,rahul.mehta@gmail.com,9876543211,Delhi,Finance,active
+Anita Desai,anita.desai@gmail.com,9876543212,Bangalore,Technology,active
+Vikram Patel,vikram.patel@gmail.com,9876543213,Pune,Retail,active
+Sneha Joshi,sneha.joshi@gmail.com,9876543214,Chennai,FMCG,active
+Amit Kumar,amit.kumar@gmail.com,9876543215,Mumbai,Finance,cooloff
+Deepa Nair,deepa.nair@gmail.com,9876543216,Hyderabad,Healthcare,active
+Rohan Singh,rohan.singh@gmail.com,9876543217,Delhi,Technology,active
+Kavita Rao,kavita.rao@gmail.com,9876543218,Bangalore,Retail,active
+Suresh Iyer,suresh.iyer@gmail.com,9876543219,Chennai,FMCG,cooloff
+Meena Pillai,meena.pillai@gmail.com,9876543220,Mumbai,Healthcare,active
+Arjun Reddy,arjun.reddy@gmail.com,9876543221,Hyderabad,Finance,active
+Pooja Gupta,pooja.gupta@gmail.com,9876543222,Pune,Technology,active
+Ravi Shankar,ravi.shankar@gmail.com,9876543223,Kolkata,Retail,inactive
+Lakshmi Menon,lakshmi.menon@gmail.com,9876543224,Chennai,Healthcare,active
+Nikhil Jain,nikhil.jain@gmail.com,9876543225,Mumbai,Finance,active
+Sunita Verma,sunita.verma@gmail.com,9876543226,Delhi,FMCG,active
+Karthik Nair,karthik.nair@gmail.com,9876543227,Bangalore,Technology,cooloff
+Divya Krishnan,divya.krishnan@gmail.com,9876543228,Hyderabad,Retail,active
+Rajesh Khanna,rajesh.khanna@gmail.com,9876543229,Mumbai,Healthcare,active
+Ananya Bose,ananya.bose@gmail.com,9876543230,Kolkata,Finance,active
+Manoj Tiwari,manoj.tiwari@gmail.com,9876543231,Delhi,FMCG,active
+Shruti Agarwal,shruti.agarwal@gmail.com,9876543232,Pune,Technology,active
+Vinod Pillai,vinod.pillai@gmail.com,9876543233,Chennai,Retail,inactive
+Geeta Sharma,geeta.sharma@gmail.com,9876543234,Mumbai,Healthcare,active
