@@ -5,6 +5,30 @@ from django.http import JsonResponse
 from django.contrib import messages
 from .models import Respondent, Survey, ReferralStatus
 from .utils import get_referrer_from_session
+# panel/views.py — add this
+from django.contrib.admin.views.decorators import staff_member_required
+
+@staff_member_required
+def update_stage(request, pk):
+    """
+    Staff updates referral stage:
+    lead → fit → completion
+    """
+    referral   = get_object_or_404(ReferralStatus, pk=pk)
+    new_stage  = request.POST.get('stage')
+    valid      = ['lead', 'fit', 'completion']
+
+    if request.method == 'POST' and new_stage in valid:
+        referral.stage = new_stage
+        if new_stage == 'completion':
+            referral.is_paid = True
+        referral.save()
+        messages.success(
+            request,
+            f'Stage updated to {new_stage} for '
+            f'{referral.referred.name}.'
+        )
+    return redirect('dashboard')
 
 # panel/views.py — add this view
 from .forms import SignupForm
