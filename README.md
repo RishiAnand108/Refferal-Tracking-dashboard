@@ -167,5 +167,95 @@ Add a license file to the repository (e.g., MIT) or update this section.
 
 ---
 This README was updated to mirror the CureConnect layout and style.
+
+## 📷 Screenshots
+
+Add the following screenshots under `assets/screenshots/` (create the
+directory if it doesn't exist). The README references these filenames —
+place your image files with the exact names below so they show up.
+
+- `assets/screenshots/login.png` — staff login screen
+- `assets/screenshots/dashboard.png` — main admin dashboard with stats and table
+- `assets/screenshots/signup.png` — public signup page showing referral banner
+- `assets/screenshots/login-welcome.png` — login showing welcome & ID message
+- `assets/screenshots/recent-referral-activity.png` — recent referral activity table
+- `assets/screenshots/ai-suggestion.png` — AI category suggestion modal
+
+If you prefer different filenames, update the image paths in this file.
+
+### Preview (placeholders)
+
+![Login screen](assets/screenshots/login.png)
+
+![Dashboard overview](assets/screenshots/dashboard.png)
+
+![Signup with referral banner](assets/screenshots/signup.png)
+
+![Login welcome message](assets/screenshots/login-welcome.png)
+
+![Recent referral activity](assets/screenshots/recent-referral-activity.png)
+
+![AI category suggestion](assets/screenshots/ai-suggestion.png)
+
+## 🔁 Workflow — How the project works (step-by-step)
+
+This section explains the user and admin flows from first visit to logout.
+
+### 1) Public referral link visit
+
+- A referrer shares a short referral link: `https://.../refer/<code>/`.
+- When a new user visits that link, the system stores the referrer's ID
+    in the visitor's session (cookie-based). The visitor sees the signup
+    page with a banner: "You were referred by <Referrer Name>".
+
+### 2) Signup (Join Panel)
+
+- The visitor fills the signup form (`/signup/`) with name, email,
+    phone, city and category.
+- Server-side validation ensures unique email/phone and enforces
+    the 3-month cool-off rule.
+- On successful signup, the new `Respondent` is created, `referred_by`
+    is set from the stored session data, and a `ReferralStatus` record is
+    created with stage `lead` and `is_paid = False`.
+- The signup page shows a confirmation with the generated unique ID.
+
+### 3) Respondent lifecycle & status updates
+
+- Respondents progress through stages: `lead` → `fit` → `completion`.
+- Admins update stages via the dashboard (list or detail views). When
+    stage becomes `completion`, the referral bonus becomes payable.
+- `ReferralStatus` stores `bonus_amount` and `is_paid` to record payouts.
+
+### 4) Admin login & dashboard
+
+- Staff users log in at `/login/` (staff dashboard). After login they see
+    the dashboard with summary cards (Total, Active, Cool-off, Leads,
+    Fits, Completions) and a searchable, filterable respondent table.
+- The admin can:
+    - Search by name/email/ID/phone/city
+    - Filter by city and category
+    - Export respondents as CSV/Excel
+    - Quickly add a respondent via the quick-add modal
+    - Open AI suggestions modal for category when notes are provided
+
+### 5) Referral activity and payouts
+
+- The Recent Referral Activity panel shows referrer, referred person,
+    stage, bonus and paid status with an inline control to update stage.
+- When `is_paid` is toggled, the system records payout details (admin
+    should reconcile payments externally). Optionally, you can extend
+    the app to integrate with a payments provider to automate payouts.
+
+### 6) Logout
+
+- Staff users can log out from the top-right menu which ends the session
+    and redirects to the public homepage or login screen.
+
+## ✅ Next steps (optional)
+
+- I can add the image files into `assets/screenshots/` if you upload them
+    here or place them in the repo and I will commit them.
+- I can also generate a `CONTRIBUTING.md` and add badges (CI, license).
+
 ---
 Updated README generated to reflect repository structure and usage.

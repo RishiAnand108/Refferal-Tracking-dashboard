@@ -3,16 +3,51 @@ import csv
 import json
 import openpyxl
 
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
-from django.contrib.admin.views.decorators import staff_member_required
 
 from .models import Respondent, Survey, ReferralStatus
 from .forms import SignupForm, AddRespondentForm
 from .utils import get_referrer_from_session
+
+
+# ── Home ──────────────────────────────────────────────────
+def home(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    return redirect('staff-login')
+
+
+# ── Staff Login ───────────────────────────────────────────
+def staff_login(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user     = authenticate(request, username=username,
+                                password=password)
+
+        if user is not None and user.is_staff:
+            login(request, user)
+            return redirect('dashboard')
+        else:
+            messages.error(request,
+                'Invalid credentials or not a staff member.')
+
+    return render(request, 'panel/login.html', {})
+
+
+# ── Staff Logout ──────────────────────────────────────────
+def staff_logout(request):
+    logout(request)
+    return redirect('staff-login')
 
 
 # ── Referral link tracking ────────────────────────────────
@@ -57,7 +92,7 @@ def signup_view(request):
             messages.success(request,
                 f'Welcome {respondent.name}! '
                 f'Your unique ID is {respondent.unique_id}.')
-            return redirect('dashboard')
+            return redirect('staff-login')
     else:
         form = SignupForm()
 
@@ -68,7 +103,7 @@ def signup_view(request):
 
 
 # ── Staff dashboard ───────────────────────────────────────
-@staff_member_required
+@login_required(login_url='/login/')
 def dashboard(request):
     q               = request.GET.get('q', '')
     city_filter     = request.GET.get('city', '')
@@ -98,7 +133,8 @@ def dashboard(request):
     inactive    = Respondent.objects.filter(status='inactive').count()
     leads       = ReferralStatus.objects.filter(stage='lead').count()
     fits        = ReferralStatus.objects.filter(stage='fit').count()
-    completions = ReferralStatus.objects.filter(stage='completion').count()
+    completions = ReferralStatus.objects.filter(
+                    stage='completion').count()
 
     city_counts = Respondent.objects.values('city').annotate(
         count=Count('id')
@@ -108,8 +144,10 @@ def dashboard(request):
         'referrer', 'referred', 'survey'
     ).order_by('-created_at')[:20]
 
-    cities     = Respondent.objects.values_list('city', flat=True).distinct()
-    categories = Respondent.objects.values_list('category', flat=True).distinct()
+    cities     = Respondent.objects.values_list(
+                    'city', flat=True).distinct()
+    categories = Respondent.objects.values_list(
+                    'category', flat=True).distinct()
 
     return render(request, 'panel/dashboard.html', {
         'page_obj':        page_obj,
@@ -131,7 +169,7 @@ def dashboard(request):
 
 
 # ── Update referral stage ─────────────────────────────────
-@staff_member_required
+@login_required(login_url='/login/')
 def update_stage(request, pk):
     referral  = get_object_or_404(ReferralStatus, pk=pk)
     new_stage = request.POST.get('stage')
@@ -149,21 +187,23 @@ def update_stage(request, pk):
 
 
 # ── Add respondent manually ───────────────────────────────
-@staff_member_required
+@login_required(login_url='/login/')
 def add_respondent(request):
     if request.method == 'POST':
         form = AddRespondentForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Respondent added successfully.')
+            messages.success(request,
+                'Respondent added successfully.')
             return redirect('dashboard')
     else:
         form = AddRespondentForm()
-    return render(request, 'panel/add_respondent.html', {'form': form})
+    return render(request, 'panel/add_respondent.html',
+                  {'form': form})
 
 
 # ── Export CSV / Excel ────────────────────────────────────
-@staff_member_required
+@login_required(login_url='/login/')
 def export_data(request):
     q               = request.GET.get('q', '')
     city_filter     = request.GET.get('city', '')
@@ -187,9 +227,11 @@ def export_data(request):
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = 'Respondents'
-        ws.append(['Unique ID', 'Name', 'Email', 'Phone',
-                   'City', 'Category', 'Status',
-                   'Referred By', 'Cool-off Until', 'Date Joined'])
+        ws.append([
+            'Unique ID', 'Name', 'Email', 'Phone',
+            'City', 'Category', 'Status',
+            'Referred By', 'Cool-off Until', 'Date Joined'
+        ])
         for r in respondents:
             ws.append([
                 r.unique_id, r.name, r.email, r.phone,
@@ -199,19 +241,24 @@ def export_data(request):
                 str(r.date_joined.date())
             ])
         response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            content_type='application/vnd.openxmlformats-'
+                         'officedocument.spreadsheetml.sheet'
         )
-        response['Content-Disposition'] = 'attachment; filename=respondents.xlsx'
+        response['Content-Disposition'] = \
+            'attachment; filename=respondents.xlsx'
         wb.save(response)
         return response
 
     else:
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=respondents.csv'
+        response['Content-Disposition'] = \
+            'attachment; filename=respondents.csv'
         writer = csv.writer(response)
-        writer.writerow(['Unique ID', 'Name', 'Email', 'Phone',
-                         'City', 'Category', 'Status',
-                         'Referred By', 'Cool-off Until', 'Date Joined'])
+        writer.writerow([
+            'Unique ID', 'Name', 'Email', 'Phone',
+            'City', 'Category', 'Status',
+            'Referred By', 'Cool-off Until', 'Date Joined'
+        ])
         for r in respondents:
             writer.writerow([
                 r.unique_id, r.name, r.email, r.phone,
@@ -229,22 +276,27 @@ def ai_categorize(request):
         notes = request.POST.get('notes', '').lower()
 
         keywords = {
-            'Healthcare': ['hospital', 'doctor', 'nurse', 'medical',
-                          'clinic', 'health', 'pharma', 'patient',
-                          'icu', 'ward'],
-            'Finance':    ['bank', 'finance', 'insurance', 'investment',
-                          'stock', 'loan', 'mutual fund', 'ca',
-                          'accountant'],
-            'Retail':     ['shop', 'store', 'mall', 'retail', 'sales',
-                          'ecommerce', 'amazon', 'flipkart', 'merchant'],
-            'FMCG':       ['fmcg', 'consumer', 'grocery', 'food',
-                          'beverage', 'brand', 'hul', 'nestle', 'itc'],
-            'Technology': ['tech', 'software', 'developer', 'engineer',
-                          'it', 'startup', 'coding', 'programmer', 'data'],
+            'Healthcare': ['hospital', 'doctor', 'nurse',
+                          'medical', 'clinic', 'health',
+                          'pharma', 'patient', 'icu', 'ward'],
+            'Finance':    ['bank', 'finance', 'insurance',
+                          'investment', 'stock', 'loan',
+                          'mutual fund', 'ca', 'accountant'],
+            'Retail':     ['shop', 'store', 'mall', 'retail',
+                          'sales', 'ecommerce', 'amazon',
+                          'flipkart', 'merchant'],
+            'FMCG':       ['fmcg', 'consumer', 'grocery',
+                          'food', 'beverage', 'brand',
+                          'hul', 'nestle', 'itc'],
+            'Technology': ['tech', 'software', 'developer',
+                          'engineer', 'it', 'startup',
+                          'coding', 'programmer', 'data'],
         }
 
-        scores = {cat: sum(1 for w in words if w in notes)
-                  for cat, words in keywords.items()}
+        scores = {
+            cat: sum(1 for w in words if w in notes)
+            for cat, words in keywords.items()
+        }
 
         best       = max(scores, key=scores.get)
         best_score = scores[best]
@@ -259,7 +311,8 @@ def ai_categorize(request):
         return JsonResponse({
             'category':   best,
             'confidence': confidence,
-            'reason':     f'Notes contain keywords associated with {best} sector.',
+            'reason':     f'Notes contain keywords associated '
+                          f'with {best} sector.',
             'stub_note':  'Connect Claude API for production use.'
         })
 
