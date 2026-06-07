@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: concave-referral-tracker
+    runtime: python
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python manage.py load_baseline_data
+    startCommand: gunicorn config.wsgi --log-file -

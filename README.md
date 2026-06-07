@@ -1,120 +1,111 @@
-# Concave Insights — Referral Tracking System
+# Concave Insights — Referral Tracking Dashboard
 
-A full-stack Django web application that automates the 
-referral lifecycle for Concave Insights' consumer panel network.
+A focused Django application to track and attribute referrals
+from a consumer panel. It records who referred whom, manages
+respondent lifecycle stages (Lead → Fit → Completion), and
+provides an admin dashboard for monitoring and payouts.
 
-## Problem Solved
-Eliminates the manual attribution bottleneck where referred 
-respondents forget to mention who referred them. The system 
-automatically tracks referral links, attributes sign-ups to 
-the correct referrer, and exposes status progress transparently.
+Key goals:
+- Prevent missed referral attribution at signup
+- Keep referral attribution simple and auditable
+- Provide admin tools for search, filtering and status updates
+
+## Features
+- Short referral links with session-based attribution
+- Self-referential `Respondent` model to build referral trees
+- Respondent lifecycle tracking: `lead`, `fit`, `completion`
+- Admin UI with search, filters and list display for models
+- Management command to load baseline respondents (`load_baseline_data`)
 
 ## Tech Stack
-- Backend: Django 5.x
-- Database: SQLite (dev) / PostgreSQL (prod)
-- Frontend: Bootstrap 5
-- API: Django REST Framework
-- Auth: Django built-in auth
+- Python 3.11+ and Django 5.x
+- SQLite (default dev) — easily switchable to PostgreSQL in production
+- Bootstrap 5 for the admin-facing templates
+- Django REST Framework (if building APIs)
 
-## Referral Flow
+## Quickstart (Development)
+1. Clone the repo and change into the project folder:
 
-Referrer shares unique link
-↓
-New person clicks /refer/<code>/
-↓
-System stores referrer in session
-↓
-New person signs up
-↓
-Attribution automatic — no manual entry needed
-↓
-Status tracked: Lead → Fit → Completion
-↓
-Bonus paid on Completion
-
-## Setup — Run in under 5 minutes
-
-### 1. Clone the repository
 ```bash
 git clone https://github.com/YOUR_USERNAME/concave-referral-tracker.git
 cd concave-referral-tracker
 ```
 
-### 2. Create virtual environment
+2. Create & activate a virtual environment:
+
 ```bash
 python -m venv venv
-
 # Windows
-venv\Scripts\activate
-
-# Mac/Linux
+venv\\Scripts\\activate
+# macOS / Linux
 source venv/bin/activate
 ```
 
-### 3. Install dependencies
+3. Install Python dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Run migrations
+4. Apply migrations and load baseline data (optional):
+
 ```bash
 python manage.py migrate
-```
-
-### 5. Load baseline data
-```bash
 python manage.py load_baseline_data
 ```
 
-### 6. Create admin user
+5. Create a superuser and run the server:
+
 ```bash
 python manage.py createsuperuser
-```
-
-### 7. Run server
-```bash
 python manage.py runserver
 ```
 
-### 8. Open in browser
-http://localhost:8000          → Dashboard
-http://localhost:8000/admin    → Django Admin
+Open http://localhost:8000 for the dashboard and
+http://localhost:8000/admin for the Django admin.
 
-## Database Schema
+## Important Management Commands
+- `python manage.py load_baseline_data` — loads `data/baseline_respondents.csv`
+- `python manage.py migrate` — apply DB migrations
+- `python manage.py createsuperuser` — create admin account
 
-### Respondent
-| Field | Type | Description |
-|-------|------|-------------|
-| unique_id | CharField | Auto-generated CI-2026-XXXX |
-| name | CharField | Full name |
-| email | EmailField | Unique |
-| phone | CharField | 10 digits |
-| city | CharField | Mumbai/Delhi/Bangalore etc |
-| category | CharField | Healthcare/Finance/Retail etc |
-| status | CharField | active/cooloff/inactive |
-| referred_by | ForeignKey | Self-referential FK |
-| referral_code | UUIDField | Unique per respondent |
-| cool_off_until | DateField | 3 months after last survey |
+## Configuration / Environment
+Recommended environment variables (use a `.env` file or your host):
 
-### ReferralStatus
-| Field | Type | Description |
-|-------|------|-------------|
-| referrer | ForeignKey | Who shared the link |
-| referred | ForeignKey | Who signed up |
-| stage | CharField | lead / fit / completion |
-| bonus_amount | DecimalField | Payout amount |
-| is_paid | BooleanField | Payment status |
+- `SECRET_KEY` — Django secret key
+- `DEBUG` — `True` for development
+- `DATABASE_URL` — e.g. `sqlite:///db.sqlite3` or a PostgreSQL URL
 
-## Architecture Decisions
-- Self-referential ForeignKey on Respondent for referral tree
-- UUID referral codes — unguessable, unique per person
-- Session-based referral attribution — works even if user 
-  closes browser and returns later
-- 3-month cooloff enforced at signup validation level
-- Q objects for multi-field search without raw SQL
+In `config/settings.py` you can switch DB engines and other settings.
 
-## Environment Variables
+## Data Model Summary
+- Respondent: stores respondent contact info, `referral_code`,
+  `referred_by` (self-FK), `status`, and cooling period fields.
+- ReferralStatus (or equivalent): records referral events,
+  stages (`lead`, `fit`, `completion`) and payout status.
 
-SECRET_KEY=your-secret-key
-DEBUG=True
-DATABASE_URL=sqlite:///db.sqlite3
+For full field definitions see `panel/models.py` and `users/models.py`.
+
+## Tests
+Run Django tests with:
+
+```bash
+python manage.py test
+```
+
+## Deployment Notes
+- Use PostgreSQL for production and set `DEBUG=False`.
+- Collect static files if serving static assets: `python manage.py collectstatic`.
+- Configure a WSGI/ASGI server (Gunicorn / Daphne) and a reverse proxy (Nginx).
+
+## Contributing
+- Please open issues or PRs for bug fixes or feature requests.
+- Keep changes small and focused; include tests for model/query logic.
+
+## License & Contact
+This project is provided as-is. Add your preferred license here.
+
+For questions or help, contact the project owner or open an issue.
+
+---
+Updated README generated to reflect repository structure and usage.
