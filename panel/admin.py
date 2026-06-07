@@ -5,14 +5,14 @@ from .models import Respondent, Survey, ReferralStatus
 
 @admin.register(Respondent)
 class RespondentAdmin(admin.ModelAdmin):
-    list_display    = ['unique_id', 'name', 'email', 'phone',
-                       'city', 'category', 'status',
-                       'referred_by', 'cool_off_until', 'date_joined']
-    list_filter     = ['status', 'category', 'city']
-    search_fields   = ['name', 'email', 'phone', 'unique_id', 'city']
-    ordering        = ['-date_joined']
+    list_display   = ['unique_id', 'name', 'email', 'phone',
+                      'city', 'category', 'status',
+                      'referred_by', 'cool_off_until', 'date_joined']
+    list_filter    = ['status', 'category', 'city']
+    search_fields  = ['name', 'email', 'phone', 'unique_id', 'city']
+    ordering       = ['-date_joined']
     readonly_fields = ['unique_id', 'referral_code', 'date_joined']
-    date_hierarchy  = 'date_joined'
+    date_hierarchy = 'date_joined'
 
     fieldsets = (
         ('Basic Info', {
@@ -22,7 +22,8 @@ class RespondentAdmin(admin.ModelAdmin):
             'fields': ('city', 'category', 'status')
         }),
         ('Referral', {
-            'fields': ('referred_by', 'referral_code', 'cool_off_until')
+            'fields': ('referred_by', 'referral_code',
+                       'cool_off_until')
         }),
         ('AI', {
             'fields': ('notes', 'ai_category')
@@ -32,9 +33,9 @@ class RespondentAdmin(admin.ModelAdmin):
 
 @admin.register(Survey)
 class SurveyAdmin(admin.ModelAdmin):
-    list_display  = ['title', 'start_date', 'end_date',    # ← fixed
+    list_display  = ['title', 'start_date', 'end_date',
                      'is_active', 'days_remaining']
-    list_filter   = ['is_active', 'start_date']            # ← fixed
+    list_filter   = ['is_active']
     search_fields = ['title']
 
 
