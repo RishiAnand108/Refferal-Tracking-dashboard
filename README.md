@@ -166,13 +166,11 @@ Please include tests for new behavior and keep PRs focused.
 Add a license file to the repository (e.g., MIT) or update this section.
 
 ---
-This README was updated to mirror the CureConnect layout and style.
-
 ## 📷 Screenshots
 
-Add the following screenshots under `assets/screenshots/` (create the
-directory if it doesn't exist). The README references these filenames —
-place your image files with the exact names below so they show up.
+Place the project screenshots under `assets/screenshots/` (create the
+directory if it doesn't exist). Add image files using these filenames so
+the README can reference them directly on GitHub.
 
 - `assets/screenshots/login.png` — staff login screen
 - `assets/screenshots/dashboard.png` — main admin dashboard with stats and table
@@ -181,22 +179,13 @@ place your image files with the exact names below so they show up.
 - `assets/screenshots/recent-referral-activity.png` — recent referral activity table
 - `assets/screenshots/ai-suggestion.png` — AI category suggestion modal
 
-If you prefer different filenames, update the image paths in this file.
+After adding images, commit them with:
 
-### Preview (placeholders)
-
-![Login screen](assets/screenshots/login.png)
-
-![Dashboard overview](assets/screenshots/dashboard.png)
-
-![Signup with referral banner](assets/screenshots/signup.png)
-
-![Login welcome message](assets/screenshots/login-welcome.png)
-
-![Recent referral activity](assets/screenshots/recent-referral-activity.png)
-
-![AI category suggestion](assets/screenshots/ai-suggestion.png)
-
+```powershell
+git add assets/screenshots/*
+git commit -m "docs: add project screenshots"
+git push origin main
+```
 ## 🔁 Workflow — How the project works (step-by-step)
 
 This section explains the user and admin flows from first visit to logout.
