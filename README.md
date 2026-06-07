@@ -119,18 +119,41 @@ http://localhost:8000/admin for admin pages.
 ## 📁 Project Structure
 
 ```
-d:/Refferal-tracking-dashboard
-├── config/               # Django settings, urls, wsgi, asgi
-├── data/                 # Baseline CSVs and fixtures
-├── panel/                # Core app: models, views, admin, management
-├── templates/            # HTML templates for dashboard and signup
-├── users/                # User models and views
+Concave-Insights/                      # Referral Tracking Dashboard
+├── config/                            # Django project settings, ASGI/WGSI, URLs
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── urls.py
+│   ├── wsgi.py
+│   └── asgi.py
+├── panel/                             # Core app: respondents, referrals, admin
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── views.py
+│   ├── forms.py
+│   ├── utils.py
+│   ├── management/                    # custom management commands
+│   │   └── commands/
+│   └── migrations/
+├── users/                             # user models, auth-related views
+│   ├── admin.py
+│   ├── models.py
+│   ├── views.py
+│   └── migrations/
+├── templates/                         # HTML templates (panel/, users/)
+├── data/                              # baseline CSVs and fixtures
+├── assets/                            # images and screenshots
+│   └── screenshots/                   # embedded README screenshots
 ├── manage.py
 ├── requirements.txt
 └── README.md
+
 ```
 
-For full layout, see `panel/` and `users/` directories.
+This layout mirrors a clear separation between project-level configuration
+(`config/`), the main Django apps (`panel/`, `users/`), and static project
+assets and documentation.
 
 ## 🧾 Data Model Summary
 
@@ -230,11 +253,7 @@ This section explains the user and admin flows from first visit to logout.
 - Staff users can log out from the top-right menu which ends the session
     and redirects to the public homepage or login screen.
 
-## ✅ Next steps (optional)
-
-- I can add the image files into `assets/screenshots/` if you upload them
-    here or place them in the repo and I will commit them.
-- I can also generate a `CONTRIBUTING.md` and add badges (CI, license).
+Built with ❤️ by rishi
 
 ---
 Updated README generated to reflect repository structure and usage.
