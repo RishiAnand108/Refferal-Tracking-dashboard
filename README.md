@@ -253,7 +253,6 @@ This section explains the user and admin flows from first visit to logout.
 - Staff users can log out from the top-right menu which ends the session
     and redirects to the public homepage or login screen.
 
-Built with ❤️ by rishi
+<p align="center">Built with ❤️ by rishi</p>
 
----
-Updated README generated to reflect repository structure and usage.
+
