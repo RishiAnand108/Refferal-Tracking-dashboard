@@ -16,7 +16,8 @@
 - Tests
 - Deployment
 - Contributing
-- License
+ - Deployment
+ - Contributing
 
 ## 🌟 Overview
 
@@ -160,10 +161,6 @@ python manage.py test
 4. Push and open a PR
 
 Please include tests for new behavior and keep PRs focused.
-
-## 📄 License
-
-Add a license file to the repository (e.g., MIT) or update this section.
 
 ---
 ## 📷 Screenshots
